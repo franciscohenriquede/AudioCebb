@@ -1,0 +1,49 @@
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { firebaseConfig } from '../Src/FireBase/FireBase';
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const capitulos = [
+  { id: 0, titulo: 'Introdução', status: 'ok', narradorId: null },
+  { id: 1, titulo: 'I. A mandala', status: 'ok', narradorId: null },
+  { id: 2, titulo: 'II. A mandala do lótus', status: 'ok', narradorId: null },
+  { id: 3, titulo: 'III. Surgimento na mandala do lótus', status: 'ok', narradorId: null },
+  { id: 4, titulo: 'IV. Dar nascimento', status: 'ok', narradorId: null },
+  { id: 5, titulo: 'V. Nossa prática no mundo', status: 'ok', narradorId: null },
+  { id: 6, titulo: 'VI. Da vacuidade à Guru Yoga', status: 'ok', narradorId: null },
+  { id: 7, titulo: 'VII. Vários caminhos', status: 'ok', narradorId: null },
+  { id: 8, titulo: 'VIII. Bençãos silenciosas', status: 'ok', narradorId: null },
+  { id: 9, titulo: 'X. Budismo engajado na ação', status: 'ok', narradorId: null },
+  { id: 10, titulo: 'Apêndice 1: Roteiro', status: 'ok', narradorId: null },
+  { id: 11, titulo: 'Apêndice 2: Responsabilidade universal', status: 'ok', narradorId: null },
+];
+async function uploadCapitulos() {
+  const livrosRef = collection(db, 'Livros');
+  const q = query(livrosRef, where('Nome', '==', 'Mandala do Lotus')); // coloque o nome do livro certo aqui
+  const querySnapshot = await getDocs(q);
+
+  if (querySnapshot.empty) {
+    console.log('Livro não encontrado.');
+    return;
+  }
+
+  const livroDoc = querySnapshot.docs[0];
+  const livroId = livroDoc.id;
+
+  for (const capitulo of capitulos) {
+    await addDoc(collection(db, 'Livros', livroId, 'capitulos'), capitulo);
+    console.log(`Capítulo ${capitulo.titulo} adicionado`);
+  }
+}
+
+uploadCapitulos();
+
+
+
+
+
+
+
+

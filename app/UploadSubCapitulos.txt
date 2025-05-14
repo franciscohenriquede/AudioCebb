@@ -1,0 +1,387 @@
+import { getFirestore, collection, addDoc, getDocs, query, where } from 'firebase/firestore';
+import { app } from '../Src/FireBase/FireBase';
+
+const db = getFirestore(app);
+
+// Subcapítulos com referência ao ID do capítulo a que pertencem
+const subcapitulos = [
+    {
+        idCapitulo: 0,
+        subcapituloId: 1,
+        topics: ["Os seis reinos", "Os 12 elos da originação interdependente"],
+        estimatedTime: "7min 52sec",
+        recorded: false,
+    },
+    {
+        idCapitulo: 0,
+        subcapituloId: 2,
+        topics: ["Etapas da cultura de paz", "O Nobre Caminho Óctuplo"],
+        estimatedTime: "5min 12sec",
+        recorded: true,
+    },
+
+    {
+        idCapitulo: 1,
+        subcapituloId: 3,
+        topics: [
+            "Diculdades: as inteligências dos seis reinos",
+            "A inteligência da Mandala da Cultura de Paz",
+            "Paz conitante"
+        ],
+        estimatedTime: "8min 03sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 1,
+        subcapituloId: 4,
+        topics: [
+            "A paz de um santo",
+            "Liberdade natural sempre presente",
+            "Migrando de uma inteligência para outra"
+        ],
+        estimatedTime: "9min 24sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 1,
+        subcapituloId: 5,
+        topics: [
+            "Inteligência e mandalas",
+            "A mandala mais ampla",
+
+        ],
+        estimatedTime: "9min 30sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 2,
+        subcapituloId: 6,
+        topics: [
+            "Mente binária",
+            "Serenidade construída",
+            "A flor de lótus",
+        ],
+        estimatedTime: "7min 45sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 2,
+        subcapituloId: 7,
+        topics: [
+            "Nasce o bodisatva",
+            "compaixão",
+            "Amor"
+        ],
+        estimatedTime: "7min 45sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 2,
+        subcapituloId: 8,
+        topics: [
+
+            "Alegria",
+            "Equanimidade",
+            "O mundo na visão dos bodisatvas"
+        ],
+        estimatedTime: "7min 45sec",
+        recorded: false
+    },
+
+
+
+    {
+        idCapitulo: 2,
+        subcapituloId: 9,
+        topics: [
+            "A paz dos bodisatvas",
+            "A ação dos bodisatvas no mundo"
+        ],
+        estimatedTime: "7min 38sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 3,
+        subcapituloId: 10,
+        topics: [
+            "Meditação: treinando a estabilidade",
+            "As cinco sabedorias",
+            "Paisagem, mente, energia e corpo"
+        ],
+        estimatedTime: "8min 50sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 3,
+        subcapituloId: 11,
+        topics: [
+            "Os quatro âmbitos de ação",
+            "A importância da paisagem",
+            "As classes de ensinamentos: visão, meditação e ação"
+        ],
+        estimatedTime: "7min 20sec",
+        recorded: false
+    },
+
+    {
+        idCapitulo: 4,
+        subcapituloId: 12,
+        topics: [
+            "O método do mala: passando um o por dentro",
+            " Os Budas: as diferentes formas de gerar benefícios",
+            " Amitaba, o Buda da Luz infinita"
+        ],
+        estimatedTime: "6min 44sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 4,
+        subcapituloId: 13,
+        topics: [
+            "Chenrezig, o Buda da Compaixão",
+            "Sua Santidade o Dalai Lama"
+        ],
+
+
+    },
+    {
+        idCapitulo: 5,
+        subcapituloId: 14,
+        topics: [
+            "O trajeto das várias contas do mala",
+            "Conclusão",
+        ],
+        estimatedTime: "6min 44sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 6,
+        subcapituloId: 15,
+        topics: [
+            "Desmontando as articialidades",
+            "Vacuidade",
+            "Vacuidade mal-humorada",
+        ],
+        estimatedTime: "6min 20sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 6,
+        subcapituloId: 16,
+        topics: [
+
+            "Vacuidade bem-humorada",
+            "Sutra Prajnaparamita",
+            "Dois olhares sobre vacuidade",
+        ],
+        estimatedTime: "6min 20sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 6,
+        subcapituloId: 17,
+        topics: [
+
+            "Práticas da luminosidade",
+            "Guru Yoga",
+            "Conclusão"
+        ],
+        estimatedTime: "7min 00sec",
+        recorded: false
+    },
+
+
+    {
+        idCapitulo: 7,
+        subcapituloId: 18,
+        topics: [
+            "Limitações do caminho do ouvinte",
+            "Limitações do caminho da compaixão",
+            "Limitações do caminho da vacuidade"
+        ],
+        estimatedTime: "10min 18sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 7,
+        subcapituloId: 19,
+        topics: [
+            "Mandala da Perfeição da Sabedoria",
+            "Meditação na mandala",
+            "Oferecimento da mandala ao mundo"
+        ],
+        estimatedTime: "9min 05sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 7,
+        subcapituloId: 20,
+        topics: [
+            "A mandala de cada um",
+            "Todos na mesma mandala",
+            "Rezar para os Budas"
+        ],
+        estimatedTime: "8min 30sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 7,
+        subcapituloId: 21,
+        topics: [
+            "Perdoar e morrer",
+            "Tempos de degenerescência",
+            "Visão, economia e educação"
+        ],
+        estimatedTime: "9min 00sec",
+        recorded: false
+    },
+    {
+        idCapitulo: 8,
+        subcapituloId: 22,
+        topics: [
+            "benções Silenciosas",
+            "Educação repressiva",
+            "Tempos atuais: liberdade sem lucidez",
+        ],
+        estimatedTime: "8min 45sec",
+        recorded: false
+    },
+    {
+       idCapitulo: 9,
+        subcapituloId: 23,
+        topics: [
+            "A compaixão silenciosa e paciente de Kuntuzangpo",
+            "A compaixão acolhedora de Chenrezig",
+            "Nascimento individual",
+        ],
+        estimatedTime: "9min 10sec",
+        recorded: false
+    },
+    {
+       idCapitulo: 9,
+        subcapituloId: 24,
+        topics: [
+            "Diculdade do nascimento em grupo",
+            "Audição interna",
+            "Audição de grupo",
+
+        ],
+        estimatedTime: "9min 50sec",
+        recorded: false
+    },
+    {
+       idCapitulo: 9,
+        subcapituloId: 25,
+        topics: [
+
+            "Sonhos em grupo e desarticulação",
+            "Exemplo de estruturação: uma comunidade étnica",
+            "Introdução de referenciais positivos"
+
+
+        ],
+        estimatedTime: "9min 50sec",
+        recorded: false
+    },
+    {
+       idCapitulo: 9,
+        subcapituloId: 26,
+        topics: [
+
+            "Referenciais budistas",
+            "Abordagem espiritual na comunidade",
+            "Metas de grupo"
+
+
+        ],
+        estimatedTime: "9min 50sec",
+        recorded: false
+    },
+    {
+       idCapitulo: 9,
+        subcapituloId: 27,
+        topics: [
+
+
+
+            "A linguagem sutil dos méritos",
+            "A mandala na comunidade"
+
+
+        ],
+        estimatedTime: "9min 50sec",
+        recorded: false
+    },
+    {
+       idCapitulo: 10,
+        subcapituloId: 28,
+        topics: [
+
+        "Nascimento no lótus",
+        " Método",
+        "Visão"
+        ],
+        estimatedTime: "9min 50sec",
+        recorded: false
+    },
+    {
+       idCapitulo: 10,
+        subcapituloId: 30,
+        topics: [
+
+            "Estruturação do grupo",
+             "Referenciais positivos",
+             "Cultura de paz"
+        ],
+        estimatedTime: "9min 50sec",
+        recorded: false
+    },
+    {
+       idCapitulo: 11,
+        subcapituloId: 31,
+        topics: [
+
+           "Responsabilidade universal em meio ao mundo “real” "
+        ],
+        estimatedTime: "9min 50sec",
+        recorded: false
+    }
+
+];
+
+async function adicionarSubcapitulos() {
+    // 1. Busca o livro
+    const livrosRef = collection(db, 'Livros');
+    const q = query(livrosRef, where('Nome', '==', 'Mandala do Lotus'));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+        console.log('Livro não encontrado.');
+        return;
+    }
+
+    const livroDoc = querySnapshot.docs[0];
+    const livroId = livroDoc.id;
+
+    // 2. Busca os capítulos existentes
+    const capitulosRef = collection(db, 'Livros', livroId, 'capitulos');
+    const capitulosSnap = await getDocs(capitulosRef);
+
+    for (const capituloDoc of capitulosSnap.docs) {
+        const capituloId = capituloDoc.id;
+        const capituloData = capituloDoc.data();
+
+        // Checa se o idCapitulo do subcapítulo corresponde ao campo 'id' do capítulo
+        for (const subcapitulo of subcapitulos) {
+            if (capituloData.id === subcapitulo.idCapitulo) {
+                await addDoc(
+                    collection(db, 'Livros', livroId, 'capitulos', capituloId, 'subcapitulos'),
+                    subcapitulo
+                );
+                console.log(`Subcapítulo ${subcapitulo.subcapituloId} adicionado ao capítulo ${capituloData.titulo}`);
+            }
+        }
+    }
+}
+
+adicionarSubcapitulos();

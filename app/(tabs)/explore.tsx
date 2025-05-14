@@ -1,109 +1,118 @@
-import { StyleSheet, Image, Platform } from 'react-native';
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from "react-native";
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
+export default function explore(): JSX.Element {
+  const [email, setEmail] = useState<string>("");
 
-export default function TabTwoScreen() {
+  const handleRegister = (): void => {
+    if (!email) {
+      Alert.alert("Por favor, insira um email.");
+      return;
+    }
+    Alert.alert("✅ Cadastro realizado", `Email cadastrado: ${email}`);
+    setEmail("");
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user's current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        <Text style={styles.title}>📖 Projeto de Leitura Acessível</Text>
+
+        <View style={styles.card}>
+          <Text style={styles.text}>
+            Olá. Queremos com este projeto que as pessoas com deficiência visual possam entrar em contato com os ensinamentos do Dharma.
+            Que possamos gerar méritos contribuindo para esse projeto e que a leitura seja significativa em seu dia.
+          </Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.text}>
+            1️⃣ As gravações são divididas em blocos de 3 a 5 minutos. Inicie e finalize cada bloco com cuidado. 
+            Você poderá revisar e aprovar seus próprios áudios.
+          </Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.text}>
+            2️⃣ Desejamos gravações orgânicas. Por favor, use apenas sua voz, sem ajuda de inteligência artificial.
+          </Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.text}>
+            3️⃣ Sugestão: use um computador para facilitar a leitura. Você pode ler com um livro físico ou diretamente no app. 
+            Grave em um ambiente tranquilo.
+          </Text>
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.text}>
+            4️⃣ Registre seu email abaixo para receber notificações sobre o andamento do projeto.
+          </Text>
+        </View>
+
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  scrollContainer: {
+    flexGrow: 1,
+    backgroundColor: "#f9f5f0",
+    padding: 20,
   },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
+  container: {
+    flex: 1,
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 20,
+    color: "#4a2c2a",
+    textAlign: "center",
+  },
+  card: {
+    backgroundColor: "#fff8ec",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+    width: "100%",
+    borderLeftWidth: 6,
+    borderLeftColor: "#d2962a",
+    elevation: 2,
+  },
+  text: {
+    fontSize: 16,
+    color: "#333",
+    lineHeight: 22,
+  },
+  inputContainer: {
+    width: "100%",
+    marginTop: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 12,
+    borderRadius: 8,
+    marginRight: 10,
+    backgroundColor: "#fff",
+    fontSize: 16,
+  },
+  button: {
+    backgroundColor: "#8B0000",
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
   },
 });

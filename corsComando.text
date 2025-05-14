@@ -1,0 +1,25 @@
+1. Criar ou editar o arquivo cors.json:
+
+Crie ou edite um arquivo cors.json com a configuração CORS que permita o acesso ao seu Firebase Storage. Um exemplo de configuração básica seria:
+
+[
+  {
+    "origin": ["*"],
+    "responseHeader": ["Content-Type"],
+    "method": ["GET", "POST", "PUT", "DELETE"],
+    "maxAgeSeconds": 3600
+  }
+]
+
+Essa configuração permite que qualquer origem (*) tenha acesso para realizar as operações GET, POST, PUT, e DELETE nos arquivos do Firebase Storage.
+2. Subir a configuração CORS com gsutil:
+
+Agora, use o comando gsutil para aplicar essa configuração CORS ao seu bucket:
+
+gsutil cors set cors.json gs://audiobooks-b7d84.firebasestorage.app
+
+3. Verifique se a configuração CORS foi aplicada:
+
+Para garantir que a configuração foi aplicada corretamente, você pode usar o seguinte comando para verificar a configuração CORS atual:
+
+gsutil cors get gs://audiobooks-b7d84.firebasestorage.app
