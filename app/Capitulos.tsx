@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { app, atualizarUsuario, db } from '../Src/FireBase/FireBase';
 import CapitulosModels from "../app/CapitulosModels";
-import { fetchCapitulos, atualizarCapitulo, atualizarIdEStatusCapitulo, resetarTodosCapitulos } from '../Src/FireBase/CapituloService';
+import { fetchCapitulos, atualizarCapitulo, atualizarIdEStatusCapitulo, resetarTodosCapitulos, verificarSubcapitulosEAtualizarCapitulo } from '../Src/FireBase/CapituloService';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { buscarDadosUsuario } from '../Src/FireBase/FireBase';
 const auth = getAuth(app);
@@ -135,6 +135,10 @@ export default function Capitulos() {
           } else if (item.narradorId === dadosAtualizados.id && item.status.trim().toLowerCase() === 'gravando') {
             const confirmed = window.confirm('Continuar Gravação');
             if (confirmed) confirmar();
+            else if (item.narradorId === dadosAtualizados.id && item.status.trim().toLowerCase() === '') {
+            const confirmed = window.confirm('Continuar Gravação');
+            if (confirmed) confirmar();
+          }
           }
         } else {
           Alert.alert('Confirmação', 'Ao escolher o capítulo você assume o compromisso de fazê-lo.', [
@@ -143,7 +147,7 @@ export default function Capitulos() {
           ]);
         }
       } else {
-        setModalMessage('Esse capítulo está sendo gravado por outra pessoa ou não está disponível.');
+        setModalMessage('Esse capítulo está sendo gravado por outra pessoa.');
         setModalVisible(true);
       }
     } catch (error) {
@@ -153,6 +157,8 @@ export default function Capitulos() {
   };
 
   useEffect(() => {
+ 
+    
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUserId(user.uid);
@@ -185,13 +191,19 @@ export default function Capitulos() {
   const renderItem = ({ item }: { item: CapitulosModels }) => {
     const corStatus = item.status === 'ok' ? '#008000' : '#B22222';
     const estaGravando = item.narradorId === userId;
+     const gravacaoConcluida = item.status  ==="gravacaoConcluida";
 
     return (
       <View style={styles.itemContainer}>
         <View style={styles.tituloBox}>
-          {estaGravando && (
+          {estaGravando &&  !gravacaoConcluida &&( 
             <Text style={styles.avisoTexto}>🤗 Ei, você está gravando este capítulo!</Text>
           )}
+          {gravacaoConcluida &&( 
+            <Text style={styles.avisoTexto}>Esta capitulo Esta com todos os subCapitulos Gravados 💫​🤭​ </Text>
+          )}
+          
+
           <Text style={styles.tituloTexto}>{item.titulo}</Text>
         </View>
         <TouchableOpacity
@@ -250,6 +262,7 @@ export default function Capitulos() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {

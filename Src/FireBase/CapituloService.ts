@@ -2,6 +2,8 @@
 import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, query, where } from 'firebase/firestore';
 import { app } from './FireBase'; // ajuste o caminho conforme seu projeto
 import CapitulosModels from "../../app/CapitulosModels";
+import Subcapitulos from '@/app/SubCapitulos';
+import subCapitulosModels from '@/app/subCapitulosModels';
 
 const db = getFirestore(app);
 
@@ -100,6 +102,26 @@ export const atualizarIdEStatusCapitulo = async (
 
 
 };
+
+//uma aplicação do allteração do status do capitulo apos todos os subCapitulos Serem gravados, indetificando se existe 
+// audio em todos os subcapitulos , o status do capitulos é alteradi. Mas nem todos os audios então funcionadno
+//todos os sub capitulos ainda não estarem armazarenando o audio
+///export const verificarConclusaoCapitulo = (subcapitulos: subCapitulosModels[]): boolean => {
+  //return subcapitulos.every(sub => !!sub.audioURL);
+//};
+
+//export const atualizarStatusCapitulo = (capitulo: CapitulosModels, subcapitulos: subCapitulosModels[]): CapitulosModels => {
+  //const todosGravados = verificarConclusaoCapitulo(subcapitulos);
+
+  //return {
+   // ...capitulo,
+   // status: todosGravados ? "GravacaoConcluida" : "gravando"
+  //};
+//};
+
+
+
+
 export const resetarTodosCapitulos = async (livroId: string): Promise<void> => {
   try {
     const capitulosRef = collection(db, 'Livros', livroId, 'capitulos');
@@ -140,3 +162,31 @@ export const buscarCapituloPorIdAtributo = async (
 
   return null;
 };
+
+
+export async function verificarSubcapitulosEAtualizarCapitulo(livroId : string , idCapitulo : any) {
+  try {
+    const subcapitulosRef =  collection(db, `Livros/${livroId}/capitulos/${idCapitulo}/subcapitulos`);
+    const subcapitulosSnap = await getDocs(subcapitulosRef);
+
+    if (subcapitulosSnap.empty) {
+      console.log("Nenhum subcapítulo encontrado.");
+      return;
+    }
+
+    // Verifica se todos os subcapítulos têm record === true
+ const todosGravados = subcapitulosSnap.docs.every(doc => doc.data().recorded === true);
+
+
+    if (todosGravados) {
+  const capituloRef = doc(db, `Livros/${livroId}/capitulos/${idCapitulo}`);
+      await updateDoc(capituloRef, { status: "gravacaoConcluida" });
+      console.log(`Capítulo ${idCapitulo} atualizado com sucesso.`);
+    } else {
+      console.log(`Capítulo ${idCapitulo} ainda possui subcapítulos não gravados.`);
+    }
+
+  } catch (error) {
+    console.error("Erro ao verificar ou atualizar:", error);
+  }
+}

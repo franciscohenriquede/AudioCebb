@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import SubCapituloService from '../Src/FireBase/subCapitulosService';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import SubChapter from './subCapitulosModels';
+import { buscarCapituloPorIdAtributo, verificarSubcapitulosEAtualizarCapitulo } from '@/Src/FireBase/CapituloService';
 
 const Subcapitulos = () => {
   const [subcapitulos, setSubcapitulos] = useState<SubChapter[]>([]);
@@ -34,9 +35,36 @@ const Subcapitulos = () => {
     }
   };
 
-  useEffect(() => {
+useEffect(() => {
+  const checkAndUpdate = async () => {
+    if (livroId && idNumero) {
+      const resultado = await buscarCapituloPorIdAtributo(livroId, idNumero);
+
+      if (!resultado) {
+        console.warn("Nenhum capítulo encontrado para esse idNúmero:", idNumero);
+        return;
+      }
+
+      const idChave = resultado.docId;
+      console.log("id base (param):", idNumero);
+      console.log("id chave (docId):", idChave);
+
+      await verificarSubcapitulosEAtualizarCapitulo(livroId, idChave);
+    }
+  };
+
+  checkAndUpdate();
+  buscarSubcapitulos();
+
+  const interval = setInterval(() => {
+    console.log("Atualizando subcapítulos automaticamente...");
+    checkAndUpdate();
     buscarSubcapitulos();
-  }, []);
+  }, 60000); // 60 segundos
+
+  return () => clearInterval(interval);
+}, [livroId, idNumero]);
+
 
   const handleMicrophoneClick = (item: SubChapter) => {
     console.log('Capítulo ID:', item.idCapitulo);

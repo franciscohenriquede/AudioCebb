@@ -7,12 +7,12 @@ import { uploadAudio, saveAudioUrl} from "../Src/FireBase/FireBase";
 import  SubCapituloService, { buscarSubCapituloPorIdAtributo } from "../Src/FireBase/subCapitulosService"
 import linksPorCapitulo from "../app/PdfLInks";
 import * as DocumentPicker from "expo-document-picker";
-import { buscarCapituloPorIdAtributo } from "@/Src/FireBase/CapituloService";
+import { buscarCapituloPorIdAtributo, verificarSubcapitulosEAtualizarCapitulo } from "@/Src/FireBase/CapituloService";
 const livroId = 'LivroId';
 
 export default function Studio() {
-  const { capituloId, subcapituloId } = useLocalSearchParams();
-
+  const { capituloId, subcapituloId, id } = useLocalSearchParams();
+  const idNumero = Number(id);
   const [recording, setRecording] = useState<any>(null);
   const [recordingUri, setRecordingUri] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -21,16 +21,6 @@ export default function Studio() {
   const [intervalId, setIntervalId] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(true);  // Estado para o modal
 
-const BuscaPorCapitulo = async () => {
-  const resultado = await buscarCapituloPorIdAtributo(livroId, 5 );
-  const resultadoSub = await buscarSubCapituloPorIdAtributo(livroId, 14, resultado.docId )
-  if (resultado) {
-    console.log("CapituloChaveId:", resultado.docId);
-        console.log("SUbCapituloChaveId:", resultadoSub.docId);
-  } else {
-    console.log("Capítulo não encontrado.");
-  }
-};
 
   const importAudioFile = async () => {
     try {
@@ -52,7 +42,31 @@ const BuscaPorCapitulo = async () => {
     }
   };
 
+const checkAndUpdate = async () => {
+     if (livroId && idNumero) {
+       const resultado = await buscarCapituloPorIdAtributo(livroId, idNumero);
+ 
+       if (!resultado) {
+         console.warn("Nenhum capítulo encontrado para esse idNúmero:", idNumero);
+         return;
+       }
+ 
+       const idChave = resultado.docId;
+       console.log("id base (param):", idNumero);
+       console.log("id chave (docId):", idChave);
+ 
+       await verificarSubcapitulosEAtualizarCapitulo(livroId, idChave);
+     }
+   };
+ 
+
+
+
+
+
+
   useEffect(() => {
+    
     console.log("Capítulo ID---::", capituloId);
         console.log("Capítulo ID---::", subcapituloId);
   }, [capituloId]);
@@ -227,6 +241,7 @@ const subCapituloChaveId = await buscarSubCapituloPorIdAtributo(livroId, Number(
           subCapituloChaveId
         });
         alert("Áudio salvo com sucesso!");
+          await checkAndUpdate();
       } else {
         alert("Erro ao salvar áudio no Firebase.");
       }
@@ -235,6 +250,7 @@ const subCapituloChaveId = await buscarSubCapituloPorIdAtributo(livroId, Number(
     } finally {
       setUploading(false);
     }
+
   };
 
   return (
@@ -344,14 +360,7 @@ const subCapituloChaveId = await buscarSubCapituloPorIdAtributo(livroId, Number(
           <Text style={styles.controlText}>❌ Cancelar</Text>
         </TouchableOpacity>
           
-             <TouchableOpacity
-          style={[styles.controlButton, styles.btnCancel]}
-          onPress={BuscaPorCapitulo}
-        >
-          <Text style={styles.controlText}>Teste</Text>
-        </TouchableOpacity>
-          
-          
+             
 
         <TouchableOpacity
           style={styles.controlButton}
