@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { app, atualizarUsuario, db } from '../Src/FireBase/FireBase';
 import CapitulosModels from "../app/CapitulosModels";
-import { fetchCapitulos, atualizarCapitulo, atualizarIdEStatusCapitulo, resetarTodosCapitulos, verificarSubcapitulosEAtualizarCapitulo } from '../Src/FireBase/CapituloService';
+import { fetchCapitulos, atualizarCapitulo, atualizarIdEStatusCapitulo, resetarTodosCapitulos, verificarSubcapitulosEAtualizarCapitulo, buscarCapituloPorIdAtributo } from '../Src/FireBase/CapituloService';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { buscarDadosUsuario } from '../Src/FireBase/FireBase';
 const auth = getAuth(app);
@@ -24,24 +24,9 @@ export default function Capitulos() {
   } | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
+      const livroId = 'LivroId'; // substituir pelo ID correto
 
-  const handleResetarCapitulos = async () => {
-    if (!LivroId) {
-      setModalMessage('Erro: LivroId indefinido.');
-      setModalVisible(true);
-      return;
-    }
-  
-    try {
-      await resetarTodosCapitulos(LivroId);
-      setModalMessage('Sucesso: Todos os capítulos foram resetados.');
-      setModalVisible(true);
-      await carregarCapitulos(LivroId); // Atualiza a lista na tela
-    } catch (error) {
-      setModalMessage('Erro ao resetar capítulos.');
-      setModalVisible(true);
-    }
-  };
+ 
 
   const carregarCapitulos = async (livroId: string) => {
     if (!livroId || typeof livroId !== 'string') {
@@ -67,8 +52,12 @@ export default function Capitulos() {
       }
 
       const capitulosOrdenados = [...capitulosFiltrados].sort((a, b) => {
-        const idA = Number(a.id);
-        const idB = Number(b.id);
+       
+        let idA = Number(a.id);
+        let idB = Number(b.id);
+
+     
+        
         return idA - idB;
       });
 
@@ -114,6 +103,7 @@ export default function Capitulos() {
 
       if (item.status && item.status.trim().toLowerCase() === 'ok' || (item.status.trim().toLowerCase() === 'gravando' && item.narradorId === dadosAtualizados.id)) {
         const confirmar = async () => {
+         
           try {
             await atualizarIdEStatusCapitulo(LivroId, item.id, userId, 'gravando');
             await atualizarUsuario(userId, { GravandoAlgumCapitulo: true });
@@ -156,37 +146,39 @@ export default function Capitulos() {
     }
   };
 
-  useEffect(() => {
- 
-    
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUserId(user.uid);
-        setLivroId('LivroId');
   
-        try {
-          const dados = await buscarDadosUsuario(user.uid);
-          setDadosUsuario(dados);
-        } catch (error) {
-          setModalMessage('Erro ao carregar dados do usuário.');
-          setModalVisible(true);
-        }
-  
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    if (user) {
+      setUserId(user.uid);
+
+      const livroIdFixo = 'LivroId';
+      setLivroId(livroIdFixo); // seta o livroId fixamente aqui
+
+      try {
+        const dados = await buscarDadosUsuario(user.uid);
+        setDadosUsuario(dados);
+
         const userDocRef = doc(db, 'usuarios', user.uid);
-        getDoc(userDocRef).then((docSnap) => {
-          if (docSnap.exists()) {
-            setStatusUsuario(docSnap.data().status === true);
-          }
-        });
-  
-        if (LivroId) carregarCapitulos(LivroId);
-      } else {
-        router.replace('/Login');
+        const docSnap = await getDoc(userDocRef);
+        if (docSnap.exists()) {
+          setStatusUsuario(docSnap.data().status === true);
+        }
+
+        // ⚠️ Agora podemos carregar os capítulos sem depender do state
+        await carregarCapitulos(livroIdFixo);
+      } catch (error) {
+        setModalMessage('Erro ao carregar dados do usuário.');
+        setModalVisible(true);
       }
-    });
-  
-    return () => unsubscribe();
-  }, [LivroId]);
+    } else {
+      router.replace('/Login');
+    }
+  });
+
+  return () => unsubscribe();
+}, []);
+
 
   const renderItem = ({ item }: { item: CapitulosModels }) => {
     const corStatus = item.status === 'ok' ? '#008000' : '#B22222';
@@ -226,10 +218,7 @@ export default function Capitulos() {
       <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
         <Text style={styles.buttonText}>Sair</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={handleResetarCapitulos} style={styles.resetButton}>
-        <Text style={styles.buttonText}>Resetar Capítulos</Text>
-      </TouchableOpacity>
-
+    
       {dadosUsuario && (
         <View style={{ marginBottom: 16 }}>
           <Text style={{ fontSize: 18 }}>👤 Nome: {dadosUsuario.nome}</Text>

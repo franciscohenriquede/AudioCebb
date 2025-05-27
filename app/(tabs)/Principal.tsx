@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import React, { useState, useCallback, useRef, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Animated } from "react-native";
 import { useRouter } from 'expo-router';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { app } from '../../Src/FireBase/FireBase';
@@ -12,30 +12,54 @@ export default function AccessiblePage(): JSX.Element {
   const auth = getAuth(app);
   const db = getFirestore(app);
   const [progress, setProgress] = useState(0);
-  const totalCapitulos = 11; // fixo
+  const [isLoading, setIsLoading] = useState(true);
+  const animatedProgress = useRef(new Animated.Value(0)).current;
 
-useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      navigation.replace('Login');
+  useFocusEffect(
+    useCallback(() => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          navigation.replace('Login');
+        }
+      });
+
+      calcularProgresso();
+
+      return () => {
+        unsubscribe();
+      };
+    }, [])
+  );
+
+  useEffect(() => {
+    if (isLoading) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(animatedProgress, {
+            toValue: 80,
+            duration: 1000,
+            useNativeDriver: false,
+          }),
+          Animated.timing(animatedProgress, {
+            toValue: 20,
+            duration: 1000,
+            useNativeDriver: false,
+          }),
+        ])
+      ).start();
+    } else {
+      Animated.timing(animatedProgress, {
+        toValue: progress,
+        duration: 500,
+        useNativeDriver: false,
+      }).start();
     }
-  });
-
-  calcularProgresso();
-
-  const interval = setInterval(() => {
-    calcularProgresso();
-  }, 2000); // atualiza a cada 10 segundos
-
-  return () => {
-    unsubscribe();
-    clearInterval(interval); // limpa o intervalo ao sair da tela
-  };
-}, []);
+  }, [isLoading, progress]);
 
   const calcularProgresso = async () => {
     try {
-      const livroId = "LivroId"; // substitua pelo ID real do seu livro
+      setIsLoading(true);
+      const livroId = "LivroId"; // ID real do livro
       const capitulosRef = collection(db, `Livros/${livroId}/capitulos`);
       const snapshot = await getDocs(capitulosRef);
 
@@ -43,6 +67,7 @@ useEffect(() => {
 
       for (const capitulo of snapshot.docs) {
         const capituloData = capitulo.data();
+
         if (capituloData.status === "gravando") {
           progresso += 1;
         }
@@ -59,8 +84,10 @@ useEffect(() => {
 
       const progressoFinal = Math.min(progresso, 100);
       setProgress(progressoFinal);
+      setIsLoading(false);
     } catch (error) {
       console.error("Erro ao calcular progresso:", error);
+      setIsLoading(false);
     }
   };
 
@@ -70,19 +97,34 @@ useEffect(() => {
 
       <View style={styles.progressBarContainer}>
         <View style={styles.progressBar}>
-          <View style={{ ...styles.progress, width: `${progress}%` }} />
+          <Animated.View
+            style={[
+              styles.progress,
+              {
+                width: animatedProgress.interpolate({
+                  inputRange: [0, 100],
+                  outputRange: ["0%", "100%"],
+                }),
+              },
+            ]}
+          />
         </View>
-        <Text style={styles.progressText}>{progress}%</Text>
+        <Text style={styles.progressText}>
+          {isLoading ? "🚀 Carregando missão..." : `${progress}% concluído`}
+        </Text>
       </View>
 
       <TouchableOpacity
         style={styles.greenButton}
         onPress={() => router.push('/Capitulos')}
+        disabled={isLoading}
       >
-        <Text style={styles.buttonText}>Contribuir com as gravações</Text>
+        <Text style={styles.buttonText}>
+          {isLoading ? "Aguarde..." : "Contribuir com as gravações"}
+        </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.goldButton}>
+      <TouchableOpacity style={styles.goldButton} disabled={isLoading}>
         <Text style={styles.buttonText}>Contribuir Com as Análises</Text>
       </TouchableOpacity>
     </View>
@@ -106,19 +148,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   progressBar: {
-    height: 10,
+    height: 12,
     backgroundColor: '#eee',
-    borderRadius: 5,
+    borderRadius: 6,
     overflow: 'hidden',
   },
   progress: {
-    height: 10,
+    height: 12,
     backgroundColor: '#27ae60',
   },
   progressText: {
-    textAlign: 'right',
-    marginTop: 5,
+    textAlign: 'center',
+    marginTop: 8,
     fontWeight: 'bold',
+    fontSize: 16,
   },
   greenButton: {
     backgroundColor: '#27ae60',

@@ -3,16 +3,18 @@ import { View, Text, Platform, ScrollView, TouchableOpacity, StyleSheet, Activit
 import * as ExpoAV from "expo-av";
 import { useLocalSearchParams } from "expo-router";
 import { WebView } from "react-native-webview";
-import { uploadAudio, saveAudioUrl} from "../Src/FireBase/FireBase";
-import  SubCapituloService, { buscarSubCapituloPorIdAtributo } from "../Src/FireBase/subCapitulosService"
+import { uploadAudio, saveAudioUrl } from "../Src/FireBase/FireBase";
+import SubCapituloService, { buscarSubCapituloPorIdAtributo } from "../Src/FireBase/subCapitulosService";
 import linksPorCapitulo from "../app/PdfLInks";
 import * as DocumentPicker from "expo-document-picker";
 import { buscarCapituloPorIdAtributo, verificarSubcapitulosEAtualizarCapitulo } from "@/Src/FireBase/CapituloService";
+
 const livroId = 'LivroId';
 
 export default function Studio() {
-  const { capituloId, subcapituloId, id } = useLocalSearchParams();
-  const idNumero = Number(id);
+  const { capituloId, subcapituloId} = useLocalSearchParams();
+  const idNumero = Number(capituloId); // ✅ Agora está dentro do componente
+
   const [recording, setRecording] = useState<any>(null);
   const [recordingUri, setRecordingUri] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -20,7 +22,6 @@ export default function Studio() {
   const [recordingTime, setRecordingTime] = useState(0);
   const [intervalId, setIntervalId] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(true);  // Estado para o modal
-
 
   const importAudioFile = async () => {
     try {
@@ -42,23 +43,26 @@ export default function Studio() {
     }
   };
 
-const checkAndUpdate = async () => {
-     if (livroId && idNumero) {
-       const resultado = await buscarCapituloPorIdAtributo(livroId, idNumero);
- 
-       if (!resultado) {
-         console.warn("Nenhum capítulo encontrado para esse idNúmero:", idNumero);
-         return;
-       }
- 
-       const idChave = resultado.docId;
-       console.log("id base (param):", idNumero);
-       console.log("id chave (docId):", idChave);
- 
-       await verificarSubcapitulosEAtualizarCapitulo(livroId, idChave);
-     }
-   };
- 
+  const checkAndUpdate = async () => {
+    console.log("🧠 checkAndUpdate foi chamado com:", { livroId, idNumero });
+
+    if (livroId && !isNaN(idNumero)) {
+      const resultado = await buscarCapituloPorIdAtributo(livroId, idNumero);
+
+      if (!resultado) {
+        console.warn("Nenhum capítulo encontrado para esse idNúmero:", idNumero);
+        return;
+      }
+
+      const idChave = resultado.docId;
+      console.log("id base (param):", idNumero);
+      console.log("id chave (docId):", idChave);
+
+      await verificarSubcapitulosEAtualizarCapitulo(livroId, idChave);
+    } else {
+      console.warn("❌ livroId ou idNumero estão indefinidos ou inválidos", { livroId, idNumero });
+    }
+  };
 
 
 
@@ -232,6 +236,9 @@ const subCapituloChaveId = await buscarSubCapituloPorIdAtributo(livroId, Number(
     try {
       const downloadURL = await uploadAudio(recordingUri, capituloId, subcapituloId);
       if (downloadURL && confirmedSalvamento) {
+       console.log("✅ Confirmado:", confirmedSalvamento);
+       console.log("✅ downloadURL:", downloadURL);
+
         await saveAudioUrl(recordingUri, livroId, CapituloChaveId?.docId, subCapituloChaveId?.docId);
         await SubCapituloService.atualizarRecordSubCapitulo( livroId, CapituloChaveId?.docId, subCapituloChaveId?.docId, true);
         console.log("🔔 Chamada saveAudioUrl com:", {
@@ -240,8 +247,9 @@ const subCapituloChaveId = await buscarSubCapituloPorIdAtributo(livroId, Number(
           CapituloChaveId,
           subCapituloChaveId
         });
-        alert("Áudio salvo com sucesso!");
           await checkAndUpdate();
+        alert("Áudio salvo com sucesso!");
+
       } else {
         alert("Erro ao salvar áudio no Firebase.");
       }

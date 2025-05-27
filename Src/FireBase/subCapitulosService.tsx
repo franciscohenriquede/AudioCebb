@@ -1,3 +1,4 @@
+import Capitulos from "@/app/Capitulos";
 import { getFirestore, collection, getDocs, query, where, doc, updateDoc } from "firebase/firestore";
 
 const db = getFirestore();
@@ -62,3 +63,30 @@ export const buscarSubCapituloPorIdAtributo = async (
 };
 
 export default SubCapituloService;
+export const resetarTodosSubCapitulos = async (
+  livroId: string,
+  capituloDocId : any
+): Promise<void> => {
+  try {
+    const capitulosRef =   collection(db, `Livros/${livroId}/capitulos/${capituloDocId}/subcapitulos`);
+    const snapshot = await getDocs(capitulosRef);
+
+    if (snapshot.empty) {
+      console.warn('Nenhum capítulo encontrado para resetar.');
+      return;
+    }
+
+    const atualizacoes = snapshot.docs.map(async (docSnap) => {
+      await updateDoc(docSnap.ref, {
+        audioUrl: '',
+        recorded: false 
+      });
+    });
+
+    await Promise.all(atualizacoes);
+    console.log(`✅ Todos os capítulos do livro ${livroId} foram resetados com sucesso.`);
+  } catch (error) {
+    console.error('❌ Erro ao resetar capítulos:', error);
+  }
+
+};

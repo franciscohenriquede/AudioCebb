@@ -1,6 +1,6 @@
 // capitulosService.ts
 import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, query, where } from 'firebase/firestore';
-import { app } from './FireBase'; // ajuste o caminho conforme seu projeto
+import { app, atualizarUsuario } from './FireBase'; // ajuste o caminho conforme seu projeto
 import CapitulosModels from "../../app/CapitulosModels";
 import Subcapitulos from '@/app/SubCapitulos';
 import subCapitulosModels from '@/app/subCapitulosModels';
@@ -36,7 +36,7 @@ export const fetchCapitulos = async (livroId: string): Promise<CapitulosModels[]
 // ✏️ Atualizar um capítulo
 export const atualizarCapitulo = async (
   livroId: string,
-  capituloId: string,
+  capituloId: any,
   data: Partial<CapitulosModels>
 ) => {
   try {
@@ -164,7 +164,7 @@ export const buscarCapituloPorIdAtributo = async (
 };
 
 
-export async function verificarSubcapitulosEAtualizarCapitulo(livroId : string , idCapitulo : any) {
+export async function verificarSubcapitulosEAtualizarCapitulo(livroId : string , idCapitulo : any , userId: any) {
   try {
     const subcapitulosRef =  collection(db, `Livros/${livroId}/capitulos/${idCapitulo}/subcapitulos`);
     const subcapitulosSnap = await getDocs(subcapitulosRef);
@@ -179,7 +179,12 @@ export async function verificarSubcapitulosEAtualizarCapitulo(livroId : string ,
 
 
     if (todosGravados) {
-  const capituloRef = doc(db, `Livros/${livroId}/capitulos/${idCapitulo}`);
+      try {
+      await atualizarUsuario(userId, { GravandoAlgumCapitulo: false });
+      } catch (error) {
+        console.error("Erro ao atualizar usuário:", error);
+      }
+       const capituloRef = doc(db, `Livros/${livroId}/capitulos/${idCapitulo}`);
       await updateDoc(capituloRef, { status: "gravacaoConcluida" });
       console.log(`Capítulo ${idCapitulo} atualizado com sucesso.`);
     } else {
