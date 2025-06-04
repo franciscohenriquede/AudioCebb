@@ -1,7 +1,7 @@
 import { EmailAuthCredential } from "firebase/auth";
 
 export default interface Usuario {
-    Email: EmailAuthCredential;
+    Email: string;
     GravandoAlgumCapitulo: boolean
    
   }

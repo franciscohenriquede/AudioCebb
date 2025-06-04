@@ -14,7 +14,7 @@ const livroId = 'LivroId';
 export default function Studio() {
   const { capituloId, subcapituloId} = useLocalSearchParams();
   const idNumero = Number(capituloId); // ✅ Agora está dentro do componente
-
+  const [userId, setUserId] = useState<string | null>(null);
   const [recording, setRecording] = useState<any>(null);
   const [recordingUri, setRecordingUri] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -58,7 +58,8 @@ export default function Studio() {
       console.log("id base (param):", idNumero);
       console.log("id chave (docId):", idChave);
 
-      await verificarSubcapitulosEAtualizarCapitulo(livroId, idChave);
+        await verificarSubcapitulosEAtualizarCapitulo(livroId, idChave, userId);
+             
     } else {
       console.warn("❌ livroId ou idNumero estão indefinidos ou inválidos", { livroId, idNumero });
     }

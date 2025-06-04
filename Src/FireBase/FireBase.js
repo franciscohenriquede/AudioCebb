@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getFirestore, collection, addDoc, doc, setDoc, getDoc } from "firebase/firestore"; // Adicionando o getDoc
 import { getAnalytics } from "firebase/analytics";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { query, where, getDocs } from "firebase/firestore";
 
 // 🔥 Configuração do Firebase
@@ -83,42 +83,59 @@ export const saveAudioUrl = async (downloadURL, livroId, capituloId, subcapitulo
 };
 
 // ✅ Função para registrar usuário
+
 export const registerUser = async (email, senha) => {
   try {
+    // 1. Verifica se já existe usuário com o mesmo e-mail no Firestore
+    const usuariosRef = collection(db, "Usuarios");
+    const q = query(usuariosRef, where("email", "==", email));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      const error = new Error("Este e-mail já está registrado.");
+      error.code = "auth/email-already-in-use";
+      throw error;
+    }
+
+    // 2. Cria o usuário no Firebase Auth
     const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
     const user = userCredential.user;
 
-    console.log("✅ Usuário registrado com sucesso:", user);
+    // 3. Envia email de verificação
+    await sendEmailVerification(user);
 
+    // 4. Cria documento do usuário no Firestore
     const userDocRef = doc(db, "Usuarios", user.uid);
     await setDoc(userDocRef, {
       email: user.email,
       criadoEm: new Date(),
+        GravandoAlgumCapitulo: false, 
+         uid: user.uid,//
     });
 
-    const registrosRef = collection(userDocRef, "Registros");
-    await addDoc(registrosRef, {
-      email: user.email,
-      uid: user.uid,
-      criadoEm: new Date(),
-    });
+    console.log("✅ Usuário registrado e dados salvos com sucesso");
 
-    console.log("✅ Dados do usuário salvos com sucesso");
   } catch (error) {
     console.error("❌ Erro ao registrar o usuário:", error.message);
+    throw error;  // Importante para o front poder capturar e mostrar mensagens
   }
 };
 
+
 // ✅ Função para login
 export const signInUser = async (email, senha) => {
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, senha);
-    console.log("✅ Login realizado com sucesso:", userCredential.user);
-    return userCredential.user;
-  } catch (error) {
-    console.error("❌ Erro ao fazer login:", error.message);
-    throw error;
+  const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+  const user = userCredential.user;
+
+  // 🔄 Atualiza os dados do usuário para garantir que a verificação esteja atualizada
+  await user.reload();
+
+  if (!user.emailVerified) {
+    console.warn("❌ Email ainda não foi verificado.");
+    throw new Error("E-mail não verificado. Por favor, acesse sua caixa de entrada e clique no link de confirmação enviado.");
   }
+
+  return user;
 };
 
 // 📂 Atualiza os dados de um usuário

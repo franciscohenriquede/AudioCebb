@@ -62,9 +62,9 @@ export const atualizarIdEStatusCapitulo = async (
 ) => {
   try {
     // Verificando se os parâmetros estão corretos
-    if (!livroId || !capituloId || !narradorId || !novoStatus) {
-      throw new Error('Faltando parâmetros necessários para atualizar o capítulo.');
-    }
+  if (!livroId || capituloId === null || capituloId === undefined || !narradorId || !novoStatus) {
+  throw new Error('Faltando parâmetros necessários para atualizar o capítulo.');
+}
 
     // Garantindo que livroId e capituloId sejam strings
     const livroIdString = String(livroId);

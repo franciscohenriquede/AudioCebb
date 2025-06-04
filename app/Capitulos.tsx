@@ -29,6 +29,7 @@ export default function Capitulos() {
  
 
   const carregarCapitulos = async (livroId: string) => {
+            console.log("User ID recebido:antes", userId);
     if (!livroId || typeof livroId !== 'string') {
       setModalMessage('Erro: livroId inválido ou indefinido');
       setModalVisible(true);
@@ -84,9 +85,11 @@ export default function Capitulos() {
   };
 
   const handleMicPress = async (item: CapitulosModels) => {
+         console.log("User ID recebido:antes", userId);
     if (!userId || !LivroId) return;
 
     try {
+      console.log("User ID recebido:", userId);
       const dadosAtualizados = await buscarDadosUsuario(userId);
 
       if (!dadosAtualizados) {
