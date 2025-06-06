@@ -52,7 +52,7 @@ export default function Cadastro() {
 
     try {
       await registerUser(email, senha);
-      setMensagem("Cadastro realizado com sucesso! Você vai ser redirecionado para a página de Login!");
+      setMensagem("✅ Cadastro concluído com sucesso! \nEnviamos um link de verificação para o seu e-mail. \n ckick nele para verificar\n 📬 Verifique sua caixa de entrada (e spam também). \n Você será redirecionado para a tela de login em instantes...");
       setTipoMensagem("sucesso");
 
       // Esconde o formulário
@@ -60,8 +60,8 @@ export default function Cadastro() {
 
       // Após 3 segundos redireciona para Login
       setTimeout(() => {
-      router.push("/Login");
-    }, 3000);
+        router.push("/Login");
+      }, 6000);
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {
         setMensagem("Este e-mail já está em uso. Tente outro.");
@@ -165,13 +165,20 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 15,
   },
-  mensagem: {
-    marginBottom: 15,
-    textAlign: "center",
-    fontSize: 14,
-    padding: 10,
-    borderRadius: 4,
-  },
+mensagem: {
+  marginBottom: 15,
+  textAlign: "center",
+  fontSize: 14,
+  padding: 12,
+  borderRadius: 8,
+// verde escuro ou vermelho escuro
+  borderLeftWidth: 5,
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 2 },
+  shadowOpacity: 0.1,
+  shadowRadius: 4,
+  elevation: 3,
+},
   erro: {
     backgroundColor: "#ffe6e6",
     color: "#cc0000",

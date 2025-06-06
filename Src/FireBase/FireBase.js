@@ -123,7 +123,7 @@ export const registerUser = async (email, senha) => {
 
 
 // ✅ Função para login
-export const signInUser = async (email, senha) => {
+export const signInUser = async (email, senha ) => {
   const userCredential = await signInWithEmailAndPassword(auth, email, senha);
   const user = userCredential.user;
 

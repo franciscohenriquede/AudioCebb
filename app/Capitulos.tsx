@@ -4,7 +4,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { app, atualizarUsuario, db } from '../Src/FireBase/FireBase';
-import CapitulosModels from "../app/CapitulosModels";
+import CapitulosModels from "./models/CapitulosModels";
 import { fetchCapitulos, atualizarCapitulo, atualizarIdEStatusCapitulo, resetarTodosCapitulos, verificarSubcapitulosEAtualizarCapitulo, buscarCapituloPorIdAtributo } from '../Src/FireBase/CapituloService';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { buscarDadosUsuario } from '../Src/FireBase/FireBase';

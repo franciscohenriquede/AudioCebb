@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
 import { getAuth, sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'expo-router';
+import { signInUser } from '@/Src/FireBase/FireBase';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -13,7 +14,7 @@ const Login = () => {
   const auth = getAuth();
 
   const handleRegistro = () => {
-    router.push('/(tabs)/Registro');
+    router.push('/tabs/registro');
   };
 
   const enviarRecuperacaoSenha = async () => {
@@ -34,9 +35,9 @@ const Login = () => {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, email, senha);
+      await  signInUser(email, senha )
       setMensagemErro('');
-      router.push('/(tabs)/Principal');''
+      router.push('/main/Principal');''
     } catch (error: any) {
       console.log("Erro de login:", error.code);
 

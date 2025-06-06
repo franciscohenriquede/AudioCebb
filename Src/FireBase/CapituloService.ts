@@ -1,7 +1,7 @@
 // capitulosService.ts
 import { getFirestore, collection, getDocs, doc, updateDoc, getDoc, query, where } from 'firebase/firestore';
 import { app, atualizarUsuario } from './FireBase'; // ajuste o caminho conforme seu projeto
-import CapitulosModels from "../../app/CapitulosModels";
+import CapitulosModels from "../../app/models/CapitulosModels";
 import Subcapitulos from '@/app/SubCapitulos';
 import subCapitulosModels from '@/app/subCapitulosModels';
 
