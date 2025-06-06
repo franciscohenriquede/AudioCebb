@@ -60,7 +60,7 @@ export default function Cadastro() {
 
       // Após 3 segundos redireciona para Login
       setTimeout(() => {
-        router.push("../lo");
+        router.push('/tabs/login'); // Caminho absoluto
       }, 6000);
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {
@@ -165,20 +165,20 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 15,
   },
-mensagem: {
-  marginBottom: 15,
-  textAlign: "center",
-  fontSize: 14,
-  padding: 12,
-  borderRadius: 8,
-// verde escuro ou vermelho escuro
-  borderLeftWidth: 5,
-  shadowColor: "#000",
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.1,
-  shadowRadius: 4,
-  elevation: 3,
-},
+  mensagem: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontSize: 14,
+    padding: 12,
+    borderRadius: 8,
+    // verde escuro ou vermelho escuro
+    borderLeftWidth: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
   erro: {
     backgroundColor: "#ffe6e6",
     color: "#cc0000",
