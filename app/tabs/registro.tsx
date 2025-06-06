@@ -60,7 +60,7 @@ export default function Cadastro() {
 
       // Após 3 segundos redireciona para Login
       setTimeout(() => {
-        router.push("/Login");
+        router.push("../lo");
       }, 6000);
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {
