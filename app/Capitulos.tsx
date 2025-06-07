@@ -217,7 +217,8 @@ useEffect(() => {
           style={[styles.micBox, { borderColor: corStatus }]}
           onPress={() => handleMicPress(item)}
         >
-          <FontAwesome name="microphone" size={24} color="#000" />
+
+          <FontAwesome name="user" size={40} color="blue" />
         </TouchableOpacity>
       </View>
     );
