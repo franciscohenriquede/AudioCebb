@@ -10,7 +10,17 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import * as Font from 'expo-font';
 import { buscarDadosUsuario } from '../Src/FireBase/FireBase';
 const auth = getAuth(app);
+ export function Tela() {
+  const [fontOk, setFontOk] = useState(false);
 
+  useEffect(() => {
+    Font.loadAsync({
+      FontAwesome: require('@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome.ttf'),
+    }).then(() => setFontOk(true));
+  }, []);
+
+  if (!fontOk) return null;
+ }
 
 export default function Capitulos() {
   const router = useRouter();
@@ -28,16 +38,6 @@ export default function Capitulos() {
   const [modalMessage, setModalMessage] = useState('');
       const livroId = 'LivroId'; // substituir pelo ID correto
 
- export default function Tela() {
-  const [fontOk, setFontOk] = useState(false);
-
-  useEffect(() => {
-    Font.loadAsync({
-      FontAwesome: require('@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome.ttf'),
-    }).then(() => setFontOk(true));
-  }, []);
-
-  if (!fontOk) return null;
 
 
   const carregarCapitulos = async (livroId: string) => {
