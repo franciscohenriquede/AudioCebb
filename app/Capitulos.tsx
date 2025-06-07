@@ -7,8 +7,10 @@ import { app, atualizarUsuario, db } from '../Src/FireBase/FireBase';
 import CapitulosModels from "./models/CapitulosModels";
 import { fetchCapitulos, atualizarCapitulo, atualizarIdEStatusCapitulo, resetarTodosCapitulos, verificarSubcapitulosEAtualizarCapitulo, buscarCapituloPorIdAtributo } from '../Src/FireBase/CapituloService';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import * as Font from 'expo-font';
 import { buscarDadosUsuario } from '../Src/FireBase/FireBase';
 const auth = getAuth(app);
+
 
 export default function Capitulos() {
   const router = useRouter();
@@ -26,7 +28,17 @@ export default function Capitulos() {
   const [modalMessage, setModalMessage] = useState('');
       const livroId = 'LivroId'; // substituir pelo ID correto
 
- 
+ export default function Tela() {
+  const [fontOk, setFontOk] = useState(false);
+
+  useEffect(() => {
+    Font.loadAsync({
+      FontAwesome: require('@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/FontAwesome.ttf'),
+    }).then(() => setFontOk(true));
+  }, []);
+
+  if (!fontOk) return null;
+
 
   const carregarCapitulos = async (livroId: string) => {
             console.log("User ID recebido:antes", userId);
@@ -224,7 +236,6 @@ useEffect(() => {
     
       {dadosUsuario && (
         <View style={{ marginBottom: 16 }}>
-          <Text style={{ fontSize: 18 }}>👤 Nome: {dadosUsuario.nome}</Text>
           <Text style={{ fontSize: 16 }}>📧 Email: {dadosUsuario.email}</Text>
           <Text style={{ fontSize: 16 }}>
             🎙️ Gravando capítulo? {dadosUsuario.GravandoAlgumCapitulo ? 'Sim' : 'Não'}
