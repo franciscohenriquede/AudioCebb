@@ -182,4 +182,3 @@ export const buscarDadosUsuario = async (userId) => {
 
 // 🔄 Exportações úteis
 export { app, auth, db, storage, firebaseConfig };
- 

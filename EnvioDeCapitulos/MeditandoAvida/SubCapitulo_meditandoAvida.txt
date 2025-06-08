@@ -1,0 +1,60 @@
+// UploadCapitulosMandala.js
+
+import admin from 'firebase-admin';
+import serviceAccount from '../Src/FireBase/audiobooks-b7d84-firebase-adminsdk-fbsvc-92046b6b3a.json' assert { type: 'json' };
+
+
+// Inicializa o app com a conta de serviço
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+const db = admin.firestore();
+
+
+Tópicos a serem lidos:
+1-	Prefácio – 6pgs
+2-	Introdução – 5pgs
+3-	Cap.1 -Breve apresentação do Budismo – 7,5pgs
+4-	Cap.1 – a partir de Buda (p. 32) – 8,5pgs
+5-	Cap.2 - Prática na vida cotidiana até Buda no país dos Kalamas p.51 - 8,5pgs
+6-	Cap. 2 – a partir de Buda no país dos Kalamas p.51- até Libertação p.59 - 9pgs
+7-	Cap. 2 - a partir de Libertação p.59 - 9pgs
+8-	Cap. 3 – Propósito da educação no budismo - 8pgs
+9-	Cap. 4 – Meditação – 8pgs
+10     -Cap. 5 – Superação das crises – até Delusão p.100 - 7,5pgs
+11      -Cap.5 – a partir de Delusão p. 100 – 7pgs
+12-     Cap.6 – Paz no dia a dia até Referenciais p.117 -7pgs
+13    -  Cap.6 – a partir de Referenciais p.117 até Natureza de Buda p. 123 – 6pgs
+14-     Cap.6 – a partir de Natureza de Buda p. 123 – 6pgs
+15   - Conclusão – 1pgs incluindo o texto da orelha do 
+
+// Subcapítulos com referência ao ID do capítulo a que pertencem
+const subcapitulos = [
+    {
+        idCapitulo: 0,
+        subcapituloId: 1,
+        topics: ["Prefácio"],
+        estimatedTime: "7min 52sec",
+        recorded: false,
+    },
+    {
+        idCapitulo: 0,
+        subcapituloId: 2,
+        topics: ["Introdução"],
+        estimatedTime: "5min 12sec",
+        recorded: False,
+    },
+
+    {
+        idCapitulo: 1,
+        subcapituloId: 3,
+        topics: [
+            "Diculdades: as inteligências dos seis reinos",
+            "A inteligência da Mandala da Cultura de Paz",
+            "Paz conitante"
+        ],
+        estimatedTime: "8min 03sec",
+        recorded: false
+    },
+    

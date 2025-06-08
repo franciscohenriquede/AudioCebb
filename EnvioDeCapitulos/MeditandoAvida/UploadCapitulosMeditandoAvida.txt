@@ -1,0 +1,50 @@
+// UploadCapitulosMandala.js
+
+import admin from 'firebase-admin';
+import serviceAccount from '../Src/FireBase/audiobooks-b7d84-firebase-adminsdk-fbsvc-92046b6b3a.json' assert { type: 'json' };
+
+
+// Inicializa o app com a conta de serviço
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+const db = admin.firestore();
+
+// Dados dos capítulos
+const capitulos = [
+  { id: 1, titulo: 'Prefácio', status: 'ok', narradorId: null },
+  { id: 2, titulo: 'Introdução', status: 'ok', narradorId: null },
+  { id: 3, titulo: 'Breve apresentação do Budismo', status: 'ok', narradorId: null },
+  { id: 4, titulo: 'Prática na vida cotidiana', status: 'ok', narradorId: null },
+  { id: 5, titulo: 'Propósito da educação no budismo', status: 'ok', narradorId: null },
+  { id: 6, titulo: 'Meditação', status: 'ok', narradorId: null },
+  { id: 7, titulo: 'Superação das crises', status: 'ok', narradorId: null },
+  { id: 8, titulo: 'Paz no dia', status: 'ok', narradorId: null },
+  { id: 9, titulo: 'Conclusão', status: 'ok', narradorId: null },
+];
+
+// Função principal
+async function criarLivroComCapitulos() {
+  try {
+    const livroRef = await db.collection('Livros').add({
+      Nome: 'Meditando a Vida',
+      Autor: 'Padma Samten',
+      Descricao: '',
+    });
+
+    const livroId = livroRef.id;
+    console.log(`📘 Livro criado com ID: ${livroId}`);
+
+    for (const capitulo of capitulos) {
+      await db.collection('Livros').doc(livroId).collection('capitulos').add(capitulo);
+      console.log(`✅ Capítulo "${capitulo.titulo}" adicionado.`);
+    }
+
+    console.log('🎉 Todos os capítulos foram inseridos com sucesso.');
+  } catch (error) {
+    console.error('❌ Erro ao criar livro e capítulos:', error);
+  }
+}
+
+criarLivroComCapitulos();
