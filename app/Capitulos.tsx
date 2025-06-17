@@ -26,12 +26,12 @@ export default function Capitulos() {
   } | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-      const livroId = 'KPId3ywqBZduGSeR0T65'; // substituir pelo ID correto
+  const livroId = 'KPId3ywqBZduGSeR0T65'; // substituir pelo ID correto
 
 
 
   const carregarCapitulos = async (livroId: string) => {
-            console.log("User ID recebido:antes", userId);
+    console.log("User ID recebido:antes", userId);
     if (!livroId || typeof livroId !== 'string') {
       setModalMessage('Erro: livroId inválido ou indefinido');
       setModalVisible(true);
@@ -55,12 +55,12 @@ export default function Capitulos() {
       }
 
       const capitulosOrdenados = [...capitulosFiltrados].sort((a, b) => {
-       
+
         let idA = Number(a.id);
         let idB = Number(b.id);
 
-     
-        
+
+
         return idA - idB;
       });
 
@@ -87,7 +87,7 @@ export default function Capitulos() {
   };
 
   const handleMicPress = async (item: CapitulosModels) => {
-         console.log("User ID recebido:antes", userId);
+    console.log("User ID recebido:antes", userId);
     if (!userId || !LivroId) return;
 
     try {
@@ -108,7 +108,7 @@ export default function Capitulos() {
 
       if (item.status && item.status.trim().toLowerCase() === 'ok' || (item.status.trim().toLowerCase() === 'gravando' && item.narradorId === dadosAtualizados.id)) {
         const confirmar = async () => {
-         
+
           try {
             await atualizarIdEStatusCapitulo(LivroId, item.id, userId, 'gravando');
             await atualizarUsuario(userId, { GravandoAlgumCapitulo: true });
@@ -131,9 +131,9 @@ export default function Capitulos() {
             const confirmed = window.confirm('Continuar Gravação');
             if (confirmed) confirmar();
             else if (item.narradorId === dadosAtualizados.id && item.status.trim().toLowerCase() === '') {
-            const confirmed = window.confirm('Continuar Gravação');
-            if (confirmed) confirmar();
-          }
+              const confirmed = window.confirm('Continuar Gravação');
+              if (confirmed) confirmar();
+            }
           }
         } else {
           Alert.alert('Confirmação', 'Ao escolher o capítulo você assume o compromisso de fazê-lo.', [
@@ -151,55 +151,55 @@ export default function Capitulos() {
     }
   };
 
-  
-useEffect(() => {
-  const unsubscribe = onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      setUserId(user.uid);
 
-      const livroIdFixo = 'LivroId';
-      setLivroId(livroIdFixo); // seta o livroId fixamente aqui
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUserId(user.uid);
 
-      try {
-        const dados = await buscarDadosUsuario(user.uid);
-        setDadosUsuario(dados);
+        const livroIdFixo = 'LivroId';
+        setLivroId(livroIdFixo); // seta o livroId fixamente aqui
 
-        const userDocRef = doc(db, 'usuarios', user.uid);
-        const docSnap = await getDoc(userDocRef);
-        if (docSnap.exists()) {
-          setStatusUsuario(docSnap.data().status === true);
+        try {
+          const dados = await buscarDadosUsuario(user.uid);
+          setDadosUsuario(dados);
+
+          const userDocRef = doc(db, 'usuarios', user.uid);
+          const docSnap = await getDoc(userDocRef);
+          if (docSnap.exists()) {
+            setStatusUsuario(docSnap.data().status === true);
+          }
+
+          // ⚠️ Agora podemos carregar os capítulos sem depender do state
+          await carregarCapitulos(livroIdFixo);
+        } catch (error) {
+          setModalMessage('Erro ao carregar dados do usuário.');
+          setModalVisible(true);
         }
-
-        // ⚠️ Agora podemos carregar os capítulos sem depender do state
-        await carregarCapitulos(livroIdFixo);
-      } catch (error) {
-        setModalMessage('Erro ao carregar dados do usuário.');
-        setModalVisible(true);
+      } else {
+        router.replace('/tabs/login');
       }
-    } else {
-      router.replace('/tabs/login');
-    }
-  });
+    });
 
-  return () => unsubscribe();
-}, []);
+    return () => unsubscribe();
+  }, []);
 
 
   const renderItem = ({ item }: { item: CapitulosModels }) => {
     const corStatus = item.status === 'ok' ? '#008000' : '#B22222';
     const estaGravando = item.narradorId === userId;
-     const gravacaoConcluida = item.status  ==="gravacaoConcluida";
+    const gravacaoConcluida = item.status === "gravacaoConcluida";
 
     return (
       <View style={styles.itemContainer}>
         <View style={styles.tituloBox}>
-          {estaGravando &&  !gravacaoConcluida &&( 
+          {estaGravando && !gravacaoConcluida && (
             <Text style={styles.avisoTexto}>🤗 Ei, você está gravando este capítulo!</Text>
           )}
-          {gravacaoConcluida &&( 
+          {gravacaoConcluida && (
             <Text style={styles.avisoTexto}>Esta capitulo Esta com todos os subCapitulos Gravados 💫​🤭​ </Text>
           )}
-          
+
 
           <Text style={styles.tituloTexto}>{item.titulo}</Text>
         </View>
@@ -207,8 +207,11 @@ useEffect(() => {
           style={[styles.micBox, { borderColor: corStatus }]}
           onPress={() => handleMicPress(item)}
         >
-
-          <FontAwesome name="microphone" size={40} color="black" />
+          {Platform.OS === 'web' ? (
+            <Text style={{ fontSize: 30 }}>🎤</Text>
+          ) : (
+            <FontAwesome name="microphone" size={40} color="black" />
+          )}
         </TouchableOpacity>
       </View>
     );
@@ -224,7 +227,7 @@ useEffect(() => {
       <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
         <Text style={styles.buttonText}>Sair</Text>
       </TouchableOpacity>
-    
+
       {dadosUsuario && (
         <View style={{ marginBottom: 16 }}>
           <Text style={{ fontSize: 16 }}>📧 Email: {dadosUsuario.email}</Text>
