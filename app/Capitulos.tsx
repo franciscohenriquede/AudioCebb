@@ -185,24 +185,23 @@ export default function Capitulos() {
   }, []);
 
 
-  const renderItem = ({ item }: { item: CapitulosModels }) => {
-    const corStatus = item.status === 'ok' ? '#008000' : '#B22222';
-    const estaGravando = item.narradorId === userId;
-    const gravacaoConcluida = item.status === "gravacaoConcluida";
+const renderItem = ({ item }: { item: CapitulosModels }) => {
+  const corStatus = item.status === 'ok' ? '#008000' : '#B22222';
+  const estaGravando = item.narradorId === userId;
+  const gravacaoConcluida = item.status === "gravacaoConcluida";
 
-    return (
-      <View style={styles.itemContainer}>
-        <View style={styles.tituloBox}>
-          {estaGravando && !gravacaoConcluida && (
-            <Text style={styles.avisoTexto}>🤗 Ei, você está gravando este capítulo!</Text>
-          )}
-          {gravacaoConcluida && (
-            <Text style={styles.avisoTexto}>Esta capitulo Esta com todos os subCapitulos Gravados 💫​🤭​ </Text>
-          )}
+  return (
+    <View style={styles.itemContainer}>
+      <View style={styles.tituloBox}>
+        {estaGravando && !gravacaoConcluida && (
+          <Text style={styles.avisoTexto}>🤗 Ei, você está gravando este capítulo!</Text>
+        )}
+        {gravacaoConcluida && (
+          <Text style={styles.avisoTexto}>Este capítulo está com todos os subcapítulos gravados 💫🤭</Text>
+        )}
+        <Text style={styles.tituloTexto}>{item.titulo}</Text>
 
-
-          <Text style={styles.tituloTexto}>{item.titulo}</Text>
-        </View>
+        {/* Microfone CENTRALIZADO DENTRO do bloco */}
         <TouchableOpacity
           style={[styles.micBox, { borderColor: corStatus }]}
           onPress={() => handleMicPress(item)}
@@ -214,8 +213,10 @@ export default function Capitulos() {
           )}
         </TouchableOpacity>
       </View>
-    );
-  };
+    </View>
+  );
+};
+
 
   return (
     <View style={styles.container}>
@@ -268,26 +269,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   itemContainer: {
-    flexDirection: 'row',
     marginBottom: 12,
-    alignItems: 'center',
+    alignItems: 'stretch', // ocupa largura total
   },
   tituloBox: {
-    flex: 1,
     backgroundColor: '#4B0000',
     paddingVertical: 12,
     paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: 'center',  // CENTRALIZA tudo dentro
   },
   tituloTexto: {
     color: '#fff',
     fontSize: 16,
+    marginBottom: 8,
+    textAlign: 'center',
   },
   micBox: {
-    borderWidth: 4,
-    borderRadius: 4,
+    borderWidth: 3,
+    borderRadius: 50,
     padding: 10,
-    marginLeft: 8,
     backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
   },
   logoutButton: {
     backgroundColor: 'red',
@@ -302,26 +307,18 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
   },
-  resetButton: {
-    backgroundColor: 'blue',
-    padding: 15,
-    borderRadius: 8,
-    width: 200,
-    alignItems: 'center',
-    marginTop: 10,
-    alignSelf: 'center',
-  },
   avisoTexto: {
-    color: '#FFD700', // Dourado para chamar atenção
+    color: '#FFD700',
     fontWeight: 'bold',
     fontSize: 14,
     marginBottom: 4,
+    textAlign: 'center',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Transparência
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     backgroundColor: '#fff',
@@ -333,6 +330,7 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 18,
     marginBottom: 20,
+    textAlign: 'center',
   },
   modalButton: {
     backgroundColor: 'blue',
@@ -342,4 +340,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-
