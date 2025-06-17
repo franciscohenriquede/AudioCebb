@@ -208,7 +208,7 @@ export default function Capitulos() {
           onPress={() => handleMicPress(item)}
         >
           {Platform.OS === 'web' ? (
-            <Text style={{ fontSize: 30 }}>🎤</Text>
+            <Text style={{ fontSize: 30 }}>🎙️</Text>
           ) : (
             <FontAwesome name="microphone" size={40} color="black" />
           )}
