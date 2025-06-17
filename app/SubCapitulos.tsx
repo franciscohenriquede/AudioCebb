@@ -163,16 +163,9 @@ const Subcapitulos = () => {
 
       {subcapitulos.length > 0 && (
         <>
-          <TouchableOpacity
-            onPress={handleResetarSUBCapitulos}
-            style={styles.resetButton}
-          >
-            <Text style={styles.buttonText}>Resetar Capítulos</Text>
-          </TouchableOpacity>
+      
 
-          <Text style={styles.footerMessage}>
-            Capítulo Concluído. Os áudios já estão armazenados no nosso banco de dados.
-          </Text>
+     
         </>
       )}
     </View>
