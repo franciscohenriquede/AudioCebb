@@ -15,6 +15,8 @@ export default function AccessiblePage(): JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const animatedProgress = useRef(new Animated.Value(0)).current;
 
+const [authChecked, setAuthChecked] = useState(false);
+
 useFocusEffect(
   useCallback(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -27,6 +29,9 @@ useFocusEffect(
         console.log("Usuário autenticado, iniciando calcularProgresso...");
         calcularProgresso();
       }
+
+      // Marcar que a autenticação foi checada (independente se logado ou não)
+      setAuthChecked(true);
     });
 
     return () => {
@@ -34,6 +39,16 @@ useFocusEffect(
     };
   }, [])
 );
+
+// Se ainda não terminou de checar a autenticação, mostra um loading simples:
+if (!authChecked) {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text>Verificando autenticação...</Text>
+    </View>
+  );
+}
+
   useEffect(() => {
     if (isLoading) {
       Animated.loop(
