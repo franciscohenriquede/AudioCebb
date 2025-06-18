@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
-import { getAuth, sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import { signInUser } from '@/Src/FireBase/FireBase';
 
@@ -35,9 +35,16 @@ const Login = () => {
     }
 
     try {
-      await  signInUser(email, senha )
+      await signInUser(email, senha);
       setMensagemErro('');
-      router.push('/main/Principal');''
+
+      // Aguarde a confirmação via onAuthStateChanged
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        if (user) {
+          router.push('/main/Principal');
+          unsubscribe(); // Para não ficar escutando pra sempre
+        }
+      });
     } catch (error: any) {
       console.log("Erro de login:", error.code);
 
@@ -189,13 +196,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
- modalContent: {
-  backgroundColor: '#fff',
-  borderRadius: 12,
-  padding: 20, // Reduzi um pouco
-  width: '70%', // De '90%' para '70%'
-  alignItems: 'center',
-},
+  modalContent: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20, // Reduzi um pouco
+    width: '70%', // De '90%' para '70%'
+    alignItems: 'center',
+  },
   modalTitle: {
     fontSize: 22,
     fontWeight: 'bold',
