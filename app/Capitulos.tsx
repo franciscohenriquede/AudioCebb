@@ -5,15 +5,17 @@ import { useRouter } from 'expo-router';
 import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
 import { app, atualizarUsuario, db } from '../Src/FireBase/FireBase';
 import CapitulosModels from "./models/CapitulosModels";
-import { fetchCapitulos, atualizarCapitulo, atualizarIdEStatusCapitulo, resetarTodosCapitulos, verificarSubcapitulosEAtualizarCapitulo, buscarCapituloPorIdAtributo } from '../Src/FireBase/CapituloService';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { fetchCapitulos, atualizarCapitulo, atualizarIdEStatusCapitulo, resetarTodosCapitulos, verificarSubcapitulosEAtualizarCapitulo, buscarCapituloPorIdAtributo, handleDescontinuarCapitulo } from '../Src/FireBase/CapituloService';
+import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import * as Font from 'expo-font';
 import { buscarDadosUsuario } from '../Src/FireBase/FireBase';
+
 const auth = getAuth(app);
 
 
 export default function Capitulos() {
   const router = useRouter();
+  const [refreshTrigger, setRefreshTrigger] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [capitulos, setCapitulos] = useState<CapitulosModels[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +28,7 @@ export default function Capitulos() {
   } | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const livroId = 'KPId3ywqBZduGSeR0T65'; // substituir pelo ID correto
+  const livroId = 'LivroId'; // substituir pelo ID correto
 
 
 
@@ -106,7 +108,7 @@ export default function Capitulos() {
         return;
       }
 
-      if (item.status && item.status.trim().toLowerCase() === 'ok' || (item.status.trim().toLowerCase() === 'gravando' && item.narradorId === dadosAtualizados.id)) {
+      if (item.status && item.status.trim().toLowerCase() === 'disponivel' || (item.status.trim().toLowerCase() === 'gravando' && item.narradorId === dadosAtualizados.id)) {
         const confirmar = async () => {
 
           try {
@@ -124,7 +126,7 @@ export default function Capitulos() {
         };
 
         if (Platform.OS === 'web') {
-          if (item.status && item.status.trim().toLowerCase() === 'ok') {
+          if (item.status && item.status.trim().toLowerCase()==='disponivel') {
             const confirmed = window.confirm('Ao escolher o capítulo você assume o compromisso de fazê-lo.');
             if (confirmed) confirmar();
           } else if (item.narradorId === dadosAtualizados.id && item.status.trim().toLowerCase() === 'gravando') {
@@ -181,41 +183,71 @@ export default function Capitulos() {
       }
     });
 
+
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (livroId) {
+      carregarCapitulos(livroId);
+    }
+  }, [refreshTrigger]);
 
-const renderItem = ({ item }: { item: CapitulosModels }) => {
-  const corStatus = item.status === 'ok' ? '#008000' : '#B22222';
-  const estaGravando = item.narradorId === userId;
-  const gravacaoConcluida = item.status === "gravacaoConcluida";
+  const renderItem = ({ item }: { item: CapitulosModels }) => {
+    const corStatus = item.status === 'disponivel'
+      ? '#008000' // Verde
+      : item.status === 'gravacaoconcluida'
+        ? '#FFD700' // Amarelo Dourado
+        : '#B22222'; // Vermelho
 
-  return (
-    <View style={styles.itemContainer}>
-      <View style={styles.tituloBox}>
-        {estaGravando && !gravacaoConcluida && (
-          <Text style={styles.avisoTexto}>🤗 Ei, você está gravando este capítulo!</Text>
-        )}
-        {gravacaoConcluida && (
-          <Text style={styles.avisoTexto}>Este capítulo está com todos os subcapítulos gravados 💫🤭</Text>
-        )}
-        <Text style={styles.tituloTexto}>{item.titulo}</Text>
+    const estaGravando = item.narradorId === userId;
+    const gravacaoConcluida = item.status === "gravacaoconcluida";
 
-        {/* Microfone CENTRALIZADO DENTRO do bloco */}
-        <TouchableOpacity
-          style={[styles.micBox, { borderColor: corStatus }]}
-          onPress={() => handleMicPress(item)}
-        >
-          {Platform.OS === 'web' ? (
-            <Text style={{ fontSize: 30 }}>🎙️</Text>
-          ) : (
-            <FontAwesome name="microphone" size={40} color="black" />
+    return (
+      <View style={styles.itemContainer}>
+        <View style={styles.tituloBox}>
+          {estaGravando && !gravacaoConcluida && (
+
+            <>
+              <Text style={styles.avisoTexto}>🤗 Ei, você está gravando este capítulo!</Text>
+              <TouchableOpacity
+                style={styles.botaoCancelarFixo}
+                onPress={async () => {
+                  const confirmar = window.confirm(
+                    "Caso não possa continuar a assumir o capítulo, clique em OK. Os Capitulos que você já contriuiu não serão perdidos"
+                  );
+                  if (confirmar) {
+                    await handleDescontinuarCapitulo(livroId, item.id, item.narradorId);
+                    await carregarCapitulos(livroId);
+                    await buscarDadosUsuario(userId);
+                  }
+                }}
+
+              >
+                <Text style={styles.textoBotao}> Ei. precisa por algum motivo cancelar o compromisso com as gravações ? clique aqui </Text>
+              </TouchableOpacity>
+            </>
           )}
-        </TouchableOpacity>
+          {gravacaoConcluida && (
+            <Text style={styles.avisoTexto}>Este capítulo está com todos os subcapítulos gravados 💫🤭</Text>
+          )}
+          <Text style={styles.tituloTexto}>{item.titulo}</Text>
+
+          {/* Microfone CENTRALIZADO DENTRO do bloco */}
+          <TouchableOpacity
+            style={[styles.micBox, { borderColor: corStatus }]}
+            onPress={() => handleMicPress(item)}
+          >
+            {Platform.OS === 'web' ? (
+              <Text style={{ fontSize: 30 }}>🎙️</Text>
+            ) : (
+              <FontAwesome name="microphone" size={40} color="black" />
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  );
-};
+    );
+  };
 
 
   return (
@@ -234,6 +266,7 @@ const renderItem = ({ item }: { item: CapitulosModels }) => {
           <Text style={{ fontSize: 16 }}>📧 Email: {dadosUsuario.email}</Text>
           <Text style={{ fontSize: 16 }}>
             🎙️ Gravando capítulo? {dadosUsuario.GravandoAlgumCapitulo ? 'Sim' : 'Não'}
+
           </Text>
         </View>
       )}
@@ -307,13 +340,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
   },
-  avisoTexto: {
-    color: '#FFD700',
-    fontWeight: 'bold',
-    fontSize: 14,
-    marginBottom: 4,
-    textAlign: 'center',
-  },
+
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -338,5 +365,37 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: 100,
     alignItems: 'center',
+  },
+  avisoTexto: {
+    color: 'orange',
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  botaoCancelar: {
+    backgroundColor: 'red',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+botaoCancelarFixo: {
+  position: 'absolute',
+  bottom: 20,
+  right: 0,
+  backgroundColor: 'transparent', // No background color
+  paddingVertical: 10,
+  paddingHorizontal: 10,
+  borderRadius: 8,
+  borderWidth: 2, // A clear border
+  borderColor: '#FF6347', // Using your original cancel color for the border
+  elevation: 0, // No shadow for a truly minimalist look
+  shadowColor: 'transparent',
+  opacity : 0.5
+  
+},
+
+  textoBotao: {
+    color: 'white',
+    textAlign: 'center',
+    fontWeight: 'bold',
   },
 });

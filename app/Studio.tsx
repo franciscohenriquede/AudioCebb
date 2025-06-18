@@ -8,6 +8,8 @@ import SubCapituloService, { buscarSubCapituloPorIdAtributo } from "../Src/FireB
 import linksPorCapitulo from "../app/PdfLInks";
 import * as DocumentPicker from "expo-document-picker";
 import { buscarCapituloPorIdAtributo, verificarSubcapitulosEAtualizarCapitulo } from "@/Src/FireBase/CapituloService";
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
 
 const livroId = 'LivroId';
 
@@ -261,7 +263,28 @@ const subCapituloChaveId = await buscarSubCapituloPorIdAtributo(livroId, Number(
     }
 
   };
+  const [currentModalIndex, setCurrentModalIndex] = useState(0);
+const instrucoes = [
+  "1️⃣ Que tal praticar um pouco de Shamata e Metta Bhavana? Intencione os estudos como um benefício para todos os seres.",
+  "2️⃣ Agora vamos dar duas orientações importantes antes de iniciar a gravação:",
+  "2️⃣ ✅ Clique em 'Gravar', fale por 3 a 5 segundos, pare a gravação e em seguida reproduza o áudio.",
+  "2️⃣ ✅ Se a gravação estiver audível e com boa qualidade, clique em 'Cancelar' e só então comece a gravação do conteúdo real.",
+  "3️⃣ Outra orientação importante: os PDFs estão organizados por capítulo, mas todos os subcapítulos ficam acessíveis na mesma tela.",
+  "3️⃣ Por isso, é fundamental que você respeite o subcapítulo correspondente. Você está atualmente no capítulo: " + capituloId +", gravando o subCapitulo :" +subcapituloId,
+  "4️⃣ Para ajudar, Caso seu capitulo possua mais de um  subCapitulo ao final do seu  subcapítulo  há um rio desenhado. Sempre que você visualizar este desenho:",
+  "5️⃣ é porque você chegou a fim do subCapitulo. 🛑 Pare a gravação, ☁️ salve o áudio, ✅ aguarde a confirmação 'Salvo com sucesso!', 🔁 só então volte para a página de subcapítulos e escolha o próximo subcapítulo para gravar.",
+  "6️⃣ É de extrema importância que esse processo seja respeitado para garantir que os áudios fiquem organizados e associados corretamente."
 
+
+]
+
+const avancarModal = () => {
+  if (currentModalIndex < instrucoes.length - 1) {
+    setCurrentModalIndex((prev) => prev + 1);
+  } else {
+    setModalVisible(false);
+  }
+};
   return (
   
   
@@ -273,36 +296,24 @@ const subCapituloChaveId = await buscarSubCapituloPorIdAtributo(livroId, Number(
 
       {/* Modal com a mensagem de introdução */}
       <Modal
-        transparent={true}
-        visible={modalVisible}
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)} // Fecha o modal
-      >
+  transparent={true}
+  visible={modalVisible}
+  animationType="fade"
+  onRequestClose={() => setModalVisible(false)}
+>
+  <View style={styles.modalContainer}>
+    <View style={styles.modalContent}>
+      <Text style={styles.modalTitle}>🔊 Instrução {currentModalIndex + 1}</Text>
+      <Text style={styles.modalText}>{instrucoes[currentModalIndex]}</Text>
 
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>🔊 Instruções para Gravação</Text>
-            <Text style={styles.modalText}>
-              
-              Antes de começar a gravação do conteúdo, siga estas etapas:
-              {"\n"} lembre de respeitar o sub topicos correspondente que vc esta. volte e anote para não esquercer
-              {"\n"}2. Pratique um pouco de shamata  e methavana , intencione os estudos em beneficios de todos os seres
-              {"\n"}3. Grave um áudio de **5 a 10 segundos** para testar a qualidade.
-              {"\n"}4. Reproduza o áudio para verificar se está claro e com boa qualidade.
-              {"\n"}5. Se estiver satisfeito com a gravação, cancele este teste e comece a gravar o conteúdo real.
-
-            </Text>
-      
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => setModalVisible(false)} // Fecha o modal
-            >
-              <Text style={styles.controlText}>OK</Text>
-            
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <TouchableOpacity style={styles.modalButton} onPress={avancarModal}>
+        <Text style={styles.controlText}>
+          {currentModalIndex < instrucoes.length - 1 ? "Próximo" : "OK, Entendi"}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
 
       {Platform.OS === "web" ? (
         <iframe
@@ -477,5 +488,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
   },
+
+
 });
 

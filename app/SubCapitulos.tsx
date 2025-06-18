@@ -101,21 +101,7 @@ const Subcapitulos = () => {
     router.push(`/Studio?capituloId=${item.idCapitulo}&subcapituloId=${item.subcapituloId}`);
   };
 
-  const handleResetarSUBCapitulos = async () => {
-    if (!LivroId) {
-      Alert.alert('Erro', 'LivroId indefinido.');
-      return;
-    }
-    try {
-      const resultado = await buscarCapituloPorIdAtributo(livroId, idNumero);
-      const idChave = resultado.docId;
-       console.log("livroidddds" +idChave)
-      await resetarTodosSubCapitulos(LivroId, idChave );
-      Alert.alert('Sucesso', 'Todos os capítulos foram resetados.');
-    } catch (error) {
-      Alert.alert('Erro', 'Erro ao resetar capítulos.');
-    }
-  };
+
 
   return (
     <View style={styles.container}>
@@ -150,7 +136,7 @@ const Subcapitulos = () => {
                   style={styles.microphoneButtonRed}
                   onPress={() => handleMicrophoneClick(item)}
                 >
-                  <Text style={{ fontSize: 24 }}>🎤</Text>
+                  <Text style={{ fontSize: 24 }}>🎙️</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -163,9 +149,9 @@ const Subcapitulos = () => {
 
       {subcapitulos.length > 0 && (
         <>
-      
+        
 
-     
+          
         </>
       )}
     </View>

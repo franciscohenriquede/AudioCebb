@@ -121,6 +121,34 @@ export const atualizarIdEStatusCapitulo = async (
 
 
 
+ 
+export const handleDescontinuarCapitulo = async (
+  
+  livroId: string,
+   capituloId: any,
+  usuarioId : any,
+  ) => {
+
+   const idReal =    await buscarCapituloPorIdAtributo(livroId , capituloId);
+console.log('livroIdzxxxxx:', livroId, typeof livroId);
+console.log('capituloIdxxxx:', capituloId, typeof capituloId);
+console.log('capituloIdReal:', idReal, typeof idReal);
+  console.log('capituloIdReal:' , usuarioId, typeof usuarioId);
+  try {
+ const capituloRef = doc(db, 'Livros', livroId, 'capitulos', String(idReal.docId));
+
+    await updateDoc(capituloRef, {
+      narradorId: '',
+      status: 'disponivel',
+    });
+     await atualizarUsuario(usuarioId, { GravandoAlgumCapitulo: false });
+    alert('Capítulo descontinuado com sucesso!');
+
+  } catch (error) {
+    console.error('Erro ao descontinuar capítulo:', error);
+    alert('Ocorreu um erro ao descontinuar o capítulo.');
+  }
+};
 
 export const resetarTodosCapitulos = async (livroId: string): Promise<void> => {
   try {
@@ -135,7 +163,7 @@ export const resetarTodosCapitulos = async (livroId: string): Promise<void> => {
     const atualizacoes = snapshot.docs.map(async (docSnap) => {
       await updateDoc(docSnap.ref, {
         narradorId: '',
-        status: 'ok',
+        status: 'Disponivel',
       });
     });
 
