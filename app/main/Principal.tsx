@@ -15,22 +15,25 @@ export default function AccessiblePage(): JSX.Element {
   const [isLoading, setIsLoading] = useState(true);
   const animatedProgress = useRef(new Animated.Value(0)).current;
 
-  useFocusEffect(
-    useCallback(() => {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (!user) {
-          navigation.replace('Login');
-        }
-      });
+useFocusEffect(
+  useCallback(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log("onAuthStateChanged:", user?.email);
 
-      calcularProgresso();
+      if (!user) {
+        console.log("Usuário não autenticado, redirecionando...");
+        navigation.replace('Login');
+      } else {
+        console.log("Usuário autenticado, iniciando calcularProgresso...");
+        calcularProgresso();
+      }
+    });
 
-      return () => {
-        unsubscribe();
-      };
-    }, [])
-  );
-
+    return () => {
+      unsubscribe();
+    };
+  }, [])
+);
   useEffect(() => {
     if (isLoading) {
       Animated.loop(
