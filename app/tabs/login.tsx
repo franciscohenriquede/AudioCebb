@@ -28,48 +28,51 @@ const Login = () => {
     }
   };
 
-  const handleLogin = async () => {
-    if (!email || !senha) {
-      setMensagemErro("⚠️ Preencha todos os campos.");
-      return;
-    }
+ const handleLogin = async () => {
+  if (!email || !senha) {
+    setMensagemErro("⚠️ Preencha todos os campos.");
+    return;
+  }
 
-    try {
-      await signInUser(email, senha);
-      setMensagemErro('');
+  try {
+    await signInUser(email, senha);
+    setMensagemErro('');
 
-      // Aguarde a confirmação via onAuthStateChanged
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          router.push('/main/Principal');
-          unsubscribe(); // Para não ficar escutando pra sempre
-        }
-      });
-    } catch (error: any) {
-      console.log("Erro de login:", error.code);
-
-      let mensagem = "Erro ao fazer login. Verifique seus dados.";
-
-      switch (error.code) {
-        case 'auth/user-not-found':
-        case 'auth/wrong-password':
-        case 'auth/invalid-credential':
-          mensagem = "E-mail ou senha incorretos.";
-          setEmailParaRecuperar(email);
-          setMostrarModal(true);
-          break;
-
-        case 'auth/invalid-email':
-          mensagem = "E-mail inválido. Verifique o formato.";
-          break;
-
-        default:
-          mensagem = "Erro: " + error.message;
+    // ✅ Esperar o Firebase confirmar o estado de autenticação
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("Usuário autenticado:", user.email);
+        router.push('/main/Principal');
+        unsubscribe();
       }
+    });
 
-      setMensagemErro(`❌ ${mensagem}`);
+  } catch (error: any) {
+    console.log("Erro de login:", error.code || error.message);
+
+    let mensagem = "Erro ao fazer login. Verifique seus dados.";
+
+    switch (error.code) {
+      case 'auth/user-not-found':
+      case 'auth/wrong-password':
+      case 'auth/invalid-credential':
+        mensagem = "E-mail ou senha incorretos.";
+        setEmailParaRecuperar(email);
+        setMostrarModal(true);
+        break;
+
+      case 'auth/invalid-email':
+        mensagem = "E-mail inválido. Verifique o formato.";
+        break;
+
+      default:
+        mensagem = "Erro: " + error.message;
     }
-  };
+
+    setMensagemErro(`❌ ${mensagem}`);
+  }
+};
+
 
   return (
     <View style={styles.container}>
