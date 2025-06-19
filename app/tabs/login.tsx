@@ -76,7 +76,7 @@ const Login = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🎙️❤️☸️​​ Vozes do Dharma</Text>
+      <Text style={styles.title}>🎙️☸️​​ Vozes do Dharma</Text>
 
       <TextInput
         style={styles.input}
