@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, Animated } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Animated, Alert } from "react-native";
 import { useRouter } from 'expo-router';
 import { useNavigation } from '@react-navigation/native';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { app } from '../../Src/FireBase/FireBase';
 
@@ -11,9 +11,11 @@ export default function AccessiblePage(): JSX.Element {
   const router = useRouter();
   const auth = getAuth(app);
   const db = getFirestore(app);
+
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const animatedProgress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -24,8 +26,8 @@ export default function AccessiblePage(): JSX.Element {
         console.log("Usuário não autenticado, redirecionando...");
         navigation.replace('Login');
       } else {
-        console.log("Usuário autenticado, iniciando calcularProgresso...");
-        calcularProgresso();
+        console.log("Usuário autenticado:", user.email);
+        setCurrentUser(user);  // Salva o usuário
       }
 
       setAuthChecked(true);
@@ -33,6 +35,12 @@ export default function AccessiblePage(): JSX.Element {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (authChecked && currentUser) {
+      calcularProgresso();
+    }
+  }, [authChecked, currentUser]);
 
   useEffect(() => {
     if (isLoading) {
@@ -62,7 +70,7 @@ export default function AccessiblePage(): JSX.Element {
   const calcularProgresso = async () => {
     try {
       setIsLoading(true);
-      const livroId = "LivroId"; // ID real do livro
+      const livroId = "LivroId"; // Confirme se este ID é válido!
       const capitulosRef = collection(db, `Livros/${livroId}/capitulos`);
       const snapshot = await getDocs(capitulosRef);
 
@@ -88,13 +96,13 @@ export default function AccessiblePage(): JSX.Element {
       const progressoFinal = Math.min(progresso, 100);
       setProgress(progressoFinal);
       setIsLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao calcular progresso:", error.code, error.message);
+      Alert.alert("Erro ao carregar progresso", error.message);
       setIsLoading(false);
     }
   };
 
-  // Exibe um loading enquanto aguarda a checagem de autenticação
   if (!authChecked) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -142,6 +150,7 @@ export default function AccessiblePage(): JSX.Element {
     </View>
   );
 }
+
 
 
 const styles = StyleSheet.create({
