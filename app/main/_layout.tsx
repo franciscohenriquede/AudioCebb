@@ -1,63 +1,51 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform, View, ActivityIndicator } from 'react-native';
-import { useFonts } from 'expo-font';
-import { FontAwesome } from '@expo/vector-icons';
-
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import React, { useEffect, useState } from 'react';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { app } from '../../Src/FireBase/FireBase';
+import { useRouter } from 'expo-router';
+import { View, Text, ActivityIndicator } from 'react-native';
 
 export default function MainLayout() {
-  const colorScheme = useColorScheme();
+  const [user, setUser] = useState(null);
+  const [checking, setChecking] = useState(true);
+  const auth = getAuth(app);
+  const router = useRouter();
 
-  const [fontsLoaded] = useFonts({
-    ...FontAwesome.font,
-  });
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      if (currentUser) {
+        setUser(currentUser);
+      } else {
+        router.replace('/tabs/login');
+      }
+      setChecking(false);
+    });
 
-  if (!fontsLoaded) {
+    return unsubscribe;
+  }, []);
+
+  if (checking) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" />
+        <Text>Verificando autenticação nas tabs...</Text>
       </View>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            position: 'absolute',
-          },
-          default: {},
-        }),
       }}
     >
-      <Tabs.Screen
-        name="Principal"
-        options={{
-          title: 'Principal',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explorar',
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="magnifyingglass" color={color} />
-          ),
-        }}
-      />
+      <Tabs.Screen name="Principal" />
+      <Tabs.Screen name="explore" />
     </Tabs>
   );
 }
+
