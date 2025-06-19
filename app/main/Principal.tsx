@@ -1,7 +1,7 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image, Animated } from "react-native";
 import { useRouter } from 'expo-router';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { app } from '../../Src/FireBase/FireBase';
@@ -13,12 +13,10 @@ export default function AccessiblePage(): JSX.Element {
   const db = getFirestore(app);
   const [progress, setProgress] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
   const animatedProgress = useRef(new Animated.Value(0)).current;
 
-const [authChecked, setAuthChecked] = useState(false);
-
-useFocusEffect(
-  useCallback(() => {
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       console.log("onAuthStateChanged:", user?.email);
 
@@ -30,24 +28,11 @@ useFocusEffect(
         calcularProgresso();
       }
 
-      // Marcar que a autenticação foi checada (independente se logado ou não)
       setAuthChecked(true);
     });
 
-    return () => {
-      unsubscribe();
-    };
-  }, [])
-);
-
-// Se ainda não terminou de checar a autenticação, mostra um loading simples:
-if (!authChecked) {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Verificando autenticação...</Text>
-    </View>
-  );
-}
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (isLoading) {
@@ -104,10 +89,19 @@ if (!authChecked) {
       setProgress(progressoFinal);
       setIsLoading(false);
     } catch (error) {
-      console.error("Erro ao calcular progresso:", error);
+      console.error("Erro ao calcular progresso:", error.code, error.message);
       setIsLoading(false);
     }
   };
+
+  // Exibe um loading enquanto aguarda a checagem de autenticação
+  if (!authChecked) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Verificando autenticação...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -148,6 +142,7 @@ if (!authChecked) {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
